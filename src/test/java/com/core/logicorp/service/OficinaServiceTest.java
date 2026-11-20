@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -39,9 +41,9 @@ class OficinaServiceTest {
 
         Long oficinaId = 1L;
 
-        Mockito.when(oficinaRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.FALSE);
+        Mockito.when(oficinaRepository.existsById(anyLong())).thenReturn(Boolean.FALSE);
         EntityNotFoundException e = assertThrows(EntityNotFoundException.class, () -> {
-            oficinaService.obtenerVehiculosDeOficina(oficinaId);
+            oficinaService.obtenerVehiculosDeOficina(oficinaId, null);
         });
 
         verify(oficinaRepository).existsById(oficinaId);
@@ -49,15 +51,15 @@ class OficinaServiceTest {
     }
 
     @Test
-    void obtenerVehiculosDeOficina_existeoficina_sinvehiculos() {
+    void obtenerVehiculosDeOficina_existeoficina_sinvehiculos_sinestado() {
 
         Long oficinaId = 1L;
 
-        Mockito.when(oficinaRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+        Mockito.when(oficinaRepository.existsById(anyLong())).thenReturn(Boolean.TRUE);
 
-        Mockito.when(vehiculoRepository.findByOficina_Id(Mockito.anyLong())).thenReturn(new ArrayList<>());
+        Mockito.when(vehiculoRepository.findByOficina_Id(anyLong())).thenReturn(new ArrayList<>());
 
-        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId);
+        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId, null);
 
         assertNotNull(vehiculos);
         assertTrue(vehiculos.isEmpty());
@@ -66,22 +68,60 @@ class OficinaServiceTest {
     }
 
     @Test
-    void obtenerVehiculosDeOficina_existeoficina_convehiculos() {
+    void obtenerVehiculosDeOficina_existeoficina_sinvehiculos_conestado() {
+
+        Long oficinaId = 1L;
+
+        Mockito.when(oficinaRepository.existsById(anyLong())).thenReturn(Boolean.TRUE);
+
+        Mockito.when(vehiculoRepository.findByOficina_IdAndEstado(anyLong(), any(EstadoVehiculo.class))).thenReturn(new ArrayList<>());
+
+        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId, EstadoVehiculo.DISPONIBLE);
+
+        assertNotNull(vehiculos);
+        assertTrue(vehiculos.isEmpty());
+        verify(oficinaRepository).existsById(oficinaId);
+        verify(vehiculoRepository).findByOficina_IdAndEstado(oficinaId, EstadoVehiculo.DISPONIBLE);
+    }
+
+    @Test
+    void obtenerVehiculosDeOficina_existeoficina_convehiculos_sinestado() {
 
         Long oficinaId = 1L;
         List<Vehiculo> mockVehiculos = new ArrayList<>();
-        Vehiculo v1 = new Vehiculo(oficinaId, "123M", "Seat", new BigDecimal("1.2"), EstadoVehiculo.EN_RUTA, new Oficina());
+        Vehiculo v1 = new Vehiculo(oficinaId, "123M", "Seat", new BigDecimal("1.2"), EstadoVehiculo.DISPONIBLE, new Oficina());
         mockVehiculos.add(v1);
 
-        Mockito.when(oficinaRepository.existsById(Mockito.anyLong())).thenReturn(Boolean.TRUE);
+        Mockito.when(oficinaRepository.existsById(anyLong())).thenReturn(Boolean.TRUE);
 
-        Mockito.when(vehiculoRepository.findByOficina_Id(Mockito.anyLong())).thenReturn(mockVehiculos);
+        Mockito.when(vehiculoRepository.findByOficina_Id(anyLong())).thenReturn(mockVehiculos);
 
-        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId);
+        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId, null);
 
         assertNotNull(vehiculos);
+        assertEquals(1, vehiculos.size());
         verify(oficinaRepository).existsById(oficinaId);
         verify(vehiculoRepository).findByOficina_Id(oficinaId);
+    }
+
+    @Test
+    void obtenerVehiculosDeOficina_existeoficina_convehiculos_conestado() {
+
+        Long oficinaId = 1L;
+        List<Vehiculo> mockVehiculos = new ArrayList<>();
+        Vehiculo v1 = new Vehiculo(oficinaId, "123M", "Seat", new BigDecimal("1.2"), EstadoVehiculo.DISPONIBLE, new Oficina());
+        mockVehiculos.add(v1);
+
+        Mockito.when(oficinaRepository.existsById(anyLong())).thenReturn(Boolean.TRUE);
+
+        Mockito.when(vehiculoRepository.findByOficina_IdAndEstado(anyLong(), any(EstadoVehiculo.class))).thenReturn(mockVehiculos);
+
+        List<VehiculoResponse> vehiculos = oficinaService.obtenerVehiculosDeOficina(oficinaId, EstadoVehiculo.DISPONIBLE);
+
+        assertNotNull(vehiculos);
+        assertEquals(1, vehiculos.size());
+        verify(oficinaRepository).existsById(oficinaId);
+        verify(vehiculoRepository).findByOficina_IdAndEstado(oficinaId, EstadoVehiculo.DISPONIBLE);
     }
 
 }
