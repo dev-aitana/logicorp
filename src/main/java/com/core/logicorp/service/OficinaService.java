@@ -1,6 +1,7 @@
 package com.core.logicorp.service;
 
 import com.core.logicorp.dto.VehiculoResponse;
+import com.core.logicorp.model.enums.EstadoVehiculo;
 import com.core.logicorp.repository.OficinaRepository;
 import com.core.logicorp.repository.VehiculoRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,15 +22,21 @@ public class OficinaService {
     }
 
     @Transactional(readOnly = true)
-    public List<VehiculoResponse> obtenerVehiculosDeOficina(Long oficinaId) {
+    public List<VehiculoResponse> obtenerVehiculosDeOficina(Long oficinaId, EstadoVehiculo estado) {
         if( !oficinaRepository.existsById(oficinaId)) {
             throw new EntityNotFoundException("No existe la oficina con ID: " + oficinaId);
         }
-
-        return vehiculoRepository.findByOficina_Id(oficinaId)
-                .stream()
-                .map(VehiculoResponse::fromEntity)
-                .toList();
+        if (null == estado){
+            return vehiculoRepository.findByOficina_Id(oficinaId)
+                    .stream()
+                    .map(VehiculoResponse::fromEntity)
+                    .toList();
+        } else {
+            return vehiculoRepository.findByOficina_IdAndEstado(oficinaId, estado)
+                    .stream()
+                    .map(VehiculoResponse::fromEntity)
+                    .toList();
+        }
     }
 
 }

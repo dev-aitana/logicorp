@@ -3,7 +3,7 @@ name: SonarCloud Coverage
 on:
   push:
     branches:
-      - main
+      [ main, "feature/**" ]
 
 jobs:
   build-and-analyze:
@@ -26,4 +26,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           chmod +x mvnw
-          ./mvnw clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.projectKey=dev-aitana_logicorp -Dsonar.organization=dev-aitana -Dsonar.host.url=https://sonarcloud.io
+          ./mvnw clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.projectKey=dev-aitana_logicorp -Dsonar.organization=dev-aitana -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/dto/** -Dsonar.coverage.exclusions=**/dto/**,**/LogicorpApplication.java
