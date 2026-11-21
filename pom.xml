@@ -134,6 +134,12 @@
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>0.8.12</version>
+						<configuration>
+							<excludes>
+								<exclude>**/dto/**</exclude>
+								<exclude>com/core/logicorp/LogicorpApplication.class</exclude>
+							</excludes>
+						</configuration>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
@@ -149,6 +155,7 @@
 								</goals>
 								<configuration>
 									<formats>
+										<format>HTML</format>
 										<format>XML</format>
 									</formats>
 								</configuration>

@@ -9,8 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
@@ -27,6 +26,17 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response);
         assertEquals("404", response.getStatus());
         assertEquals("No existe la oficina con ID: 1", response.getMessage());
+    }
+
+    @Test
+    void handle400_requiredTypeEsNull_devuelveTipoDesconocido() {
+        MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
+                "abc", null, "parametro", null, new IllegalArgumentException("error"));
+
+        ExceptionResponse response = globalExceptionHandler.handle400(ex);
+
+        assertEquals("400", response.getStatus());
+        assertTrue(response.getMessage().contains("desconocido"));
     }
 
     @Test
